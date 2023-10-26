@@ -7,6 +7,8 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Validator\Constraints as Assert;
+
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
@@ -16,29 +18,33 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?int $id = null;
 
+    #[Assert\NotBlank]
     #[ORM\Column(length: 50)]
-    private ?string $first_name = null;
+    public ?string $first_name = null;
 
+    #[Assert\NotBlank]
     #[ORM\Column(length: 50)]
-    private ?string $last_name = null;
+    public ?string $last_name = null;
 
+    #[Assert\NotBlank]
     #[ORM\Column(length: 255)]
     private ?string $password = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $photo_path = null;
+    public ?string $photo_path = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $date_of_birth = null;
+    public ?\DateTimeInterface $date_of_birth = null;
 
     #[ORM\Column(length: 30)]
     private string $role = 'customer';
 
+    #[Assert\email]
     #[ORM\Column(length: 50)]
-    private ?string $email = null;
+    public ?string $email = null;
 
     #[ORM\Column(length: 50, nullable: true)]
-    private ?string $phone = null;
+    public ?string $phone = null;
 
     public function getId(): ?int
     {

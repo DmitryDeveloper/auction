@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use App\Entity\User;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
  * @Route("/api", name="api_")
@@ -18,7 +19,7 @@ class AuthController extends AbstractController
     /**
      * @Route("/register", name="register", methods={"POST"})
      */
-    public function register(ManagerRegistry $doctrine, Request $request, UserPasswordHasherInterface $passwordHasher): Response
+    public function register(ManagerRegistry $doctrine, Request $request, UserPasswordHasherInterface $passwordHasher, ValidatorInterface $validator): Response
     {
         $em = $doctrine->getManager();
         $decodedBody = json_decode($request->getContent());
@@ -42,6 +43,11 @@ class AuthController extends AbstractController
         $user->setLastName($lastName);
         $user->setDateOfBirth($dateOfBirth);
         $user->setPhone($phone);
+
+        $errors = $validator->validate($user);
+        if (count($errors) > 0) {
+            return new Response((string) $errors, 400);
+        }
 
         $em->persist($user);
         $em->flush();
