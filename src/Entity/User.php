@@ -40,7 +40,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private string $role = 'customer';
 
     #[Assert\email]
-    #[ORM\Column(length: 50)]
+    #[ORM\Column(length: 50, unique: true)]
     public ?string $email = null;
 
     #[ORM\Column(length: 50, nullable: true)]
