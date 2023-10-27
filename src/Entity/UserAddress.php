@@ -6,7 +6,7 @@ use App\Repository\UserAddressRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: UserAddressRepository::class)]
-class UserAddress
+class UserAddress extends Base
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]

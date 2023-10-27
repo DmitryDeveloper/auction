@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Category;
+use App\Service\CategoryService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -24,23 +25,25 @@ class CategoryController extends AbstractController
 
     #[IsGranted('ROLE_MODERATOR', statusCode: 403)]
     #[Route('', name: 'category_create', methods: ['POST'])]
-    public function create(EntityManagerInterface $entityManager, Request $request, ValidatorInterface $validator): JsonResponse
+    public function create(
+        Request $request,
+        ValidatorInterface $validator,
+        CategoryService $categoryService
+    ): JsonResponse
     {
         $decodedBody = json_decode($request->getContent());
 
-        $category = new Category();
-        $category->setName($decodedBody->name);
-        $category->setDescription($decodedBody->description);
+        $category = $categoryService->create(
+            $decodedBody->name,
+            $decodedBody->description
+        );
 
         $errors = $validator->validate($category);
         if (count($errors) > 0) {
             return $this->json((string) $errors, 400);
         }
 
-        // tell Doctrine you want to (eventually) save the Category (no queries yet)
-        $entityManager->persist($category);
-        // actually executes the queries (i.e. the INSERT query)
-        $entityManager->flush();
+        $categoryService->save($category);
 
         return $this->json($category);
     }
@@ -64,10 +67,9 @@ class CategoryController extends AbstractController
 
     #[IsGranted('ROLE_MODERATOR', statusCode: 403)]
     #[Route('/{id}', name: 'category_delete', methods: ['DELETE'])]
-    public function delete(EntityManagerInterface $entityManager, Category $category): JsonResponse
+    public function delete(Category $category, CategoryService $categoryService): JsonResponse
     {
-        $entityManager->remove($category);
-        $entityManager->flush();
+        $categoryService->delete($category);
 
         return $this->json([]);
     }
