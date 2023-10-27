@@ -13,6 +13,14 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 #[Route('/api/categories')]
 class CategoryController extends AbstractController
 {
+    #[Route('/', name: 'category_create', methods: ['GET'])]
+    public function index(EntityManagerInterface $entityManager): JsonResponse
+    {
+        $categories = $entityManager->getRepository(Category::class)->findAll();
+
+        return $this->json($categories);
+    }
+
     #[Route('/', name: 'category_create', methods: ['POST'])]
     public function create(EntityManagerInterface $entityManager, Request $request, ValidatorInterface $validator): JsonResponse
     {
