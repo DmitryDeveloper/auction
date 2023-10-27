@@ -15,16 +15,16 @@ class Category
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    private ?int $id = null;
+    public ?int $id = null;
 
     #[Assert\NotBlank]
-    #[Assert\NotBlank]
+    #[Assert\Unique]
     #[Assert\Length(min: 2)]
     #[ORM\Column(length: 50, unique: true)]
-    private string $name;
+    public string $name;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    private ?string $description = null;
+    public ?string $description = null;
 
     #[ORM\ManyToMany(targetEntity: Product::class, mappedBy: 'categories')]
     private Collection $products;

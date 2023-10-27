@@ -43,6 +43,7 @@ class AuthController extends AbstractController
         $user->setLastName($lastName);
         $user->setDateOfBirth($dateOfBirth);
         $user->setPhone($phone);
+        $user->setRoles(['ROLE_CUSTOMER']);
 
         $errors = $validator->validate($user);
         if (count($errors) > 0) {

@@ -16,16 +16,8 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[Route('/api/products')]
 class ProductController extends AbstractController
 {
-    #[Route('/', name: 'app_product')]
-    public function index(): JsonResponse
-    {
-        return $this->json([
-            'message' => 'Welcome to your new controller!',
-            'path' => 'src/Controller/ProductController.php',
-        ]);
-    }
-
-    #[Route('/', name: 'create_product', methods: ['POST'])]
+    #[IsGranted('ROLE_CUSTOMER')]
+    #[Route('', name: 'create_product', methods: ['POST'])]
     public function create(EntityManagerInterface $entityManager, Request $request, #[CurrentUser] User $user): JsonResponse
     {
         $decodedBody = json_decode($request->getContent());
@@ -36,18 +28,22 @@ class ProductController extends AbstractController
         $product->setShortDescription($decodedBody->short_description);
         $product->setDescription($decodedBody->description);
         $product->addCategories($categories);
-        $product->setSellerId($user->getId());
+        $product->setSeller($user);
 
         // tell Doctrine you want to (eventually) save the Product (no queries yet)
         $entityManager->persist($product);
         // actually executes the queries (i.e. the INSERT query)
         $entityManager->flush();
 
-        return $this->json($product);
+        return $this->json([
+            'name' => $product->getName(),
+            'short_description' => $product->getShortDescription(),
+            'description' => $product->getDescription()
+        ]);
     }
 
     #[Route('/{id}', name: 'product_update', methods: ['PUT'])]
-    #[IsGranted('edit', subject: 'product', message: 'Posts can only be edited by their authors.')]
+    #[IsGranted('edit', subject: 'product', message: 'Products can only be edited by their owner.')]
     public function update(EntityManagerInterface $entityManager, Request $request, Product $product): JsonResponse
     {
         $decodedBody = json_decode($request->getContent());
@@ -58,17 +54,26 @@ class ProductController extends AbstractController
         $product->addCategories($categories);
         $entityManager->flush();
 
-        return $this->json($product);
+        return $this->json([
+            'name' => $product->getName(),
+            'short_description' => $product->getShortDescription(),
+            'description' => $product->getDescription()
+        ]);
     }
 
     #[Route('/{id}', name: 'product_show', methods: ['GET'])]
     public function show(Product $product): JsonResponse
     {
-        return $this->json($product);
+        return $this->json([
+            'name' => $product->getName(),
+            'short_description' => $product->getShortDescription(),
+            'description' => $product->getDescription()
+        ]);
     }
 
     #[Route('/{id}', name: 'product_delete', methods: ['DELETE'])]
-    public function delete(EntityManagerInterface $entityManager, Product $product): JsonResponse
+    #[IsGranted('delete', subject: 'product', message: 'Products can only be deleted by their owner.')]
+    public function delete(EntityManagerInterface $entityManager, Product $product, #[CurrentUser] User $user): JsonResponse
     {
         $entityManager->remove($product);
         $entityManager->flush();

@@ -8,12 +8,13 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('/api/categories')]
 class CategoryController extends AbstractController
 {
-    #[Route('/', name: 'category_create', methods: ['GET'])]
+    #[Route('', name: 'category_index', methods: ['GET'])]
     public function index(EntityManagerInterface $entityManager): JsonResponse
     {
         $categories = $entityManager->getRepository(Category::class)->findAll();
@@ -21,7 +22,8 @@ class CategoryController extends AbstractController
         return $this->json($categories);
     }
 
-    #[Route('/', name: 'category_create', methods: ['POST'])]
+    #[IsGranted('ROLE_MODERATOR', statusCode: 403)]
+    #[Route('', name: 'category_create', methods: ['POST'])]
     public function create(EntityManagerInterface $entityManager, Request $request, ValidatorInterface $validator): JsonResponse
     {
         $decodedBody = json_decode($request->getContent());
@@ -49,6 +51,7 @@ class CategoryController extends AbstractController
         return $this->json($category);
     }
 
+    #[IsGranted('ROLE_MODERATOR', statusCode: 403)]
     #[Route('/{id}', name: 'category_update', methods: ['PUT'])]
     public function update(EntityManagerInterface $entityManager, Request $request, Category $category): JsonResponse
     {
@@ -59,6 +62,7 @@ class CategoryController extends AbstractController
         return $this->json($category);
     }
 
+    #[IsGranted('ROLE_MODERATOR', statusCode: 403)]
     #[Route('/{id}', name: 'category_delete', methods: ['DELETE'])]
     public function delete(EntityManagerInterface $entityManager, Category $category): JsonResponse
     {

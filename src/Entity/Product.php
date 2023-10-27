@@ -27,7 +27,7 @@ class Product
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
-    private ?User $seller_id = null;
+    private ?User $seller = null;
 
     #[ORM\ManyToMany(targetEntity: Category::class, inversedBy: 'products')]
     private Collection $categories;
@@ -78,14 +78,14 @@ class Product
         return $this;
     }
 
-    public function getSellerId(): ?User
+    public function getSeller(): ?User
     {
-        return $this->seller_id;
+        return $this->seller;
     }
 
-    public function setSellerId(?User $seller_id): static
+    public function setSeller(?User $seller): static
     {
-        $this->seller_id = $seller_id;
+        $this->seller = $seller;
 
         return $this;
     }
