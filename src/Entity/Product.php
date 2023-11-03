@@ -32,6 +32,9 @@ class Product extends Base
     #[ORM\ManyToMany(targetEntity: Category::class, inversedBy: 'products')]
     private Collection $categories;
 
+    #[ORM\ManyToOne(inversedBy: 'products')]
+    private ?Slot $slot = null;
+
     public function __construct()
     {
         $this->categories = new ArrayCollection();
@@ -119,6 +122,18 @@ class Product extends Base
     public function removeCategory(Category $category): static
     {
         $this->categories->removeElement($category);
+
+        return $this;
+    }
+
+    public function getSlot(): ?Slot
+    {
+        return $this->slot;
+    }
+
+    public function setSlot(?Slot $slot): static
+    {
+        $this->slot = $slot;
 
         return $this;
     }

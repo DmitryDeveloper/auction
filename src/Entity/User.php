@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -45,6 +47,14 @@ class User extends Base implements UserInterface, PasswordAuthenticatedUserInter
 
     #[ORM\Column(length: 50, nullable: true)]
     public ?string $phone = null;
+
+    #[ORM\OneToMany(mappedBy: 'seller', targetEntity: Slot::class)]
+    private Collection $slots;
+
+    public function __construct()
+    {
+        $this->slots = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -176,6 +186,36 @@ class User extends Base implements UserInterface, PasswordAuthenticatedUserInter
     public function setPhone(?string $phone): static
     {
         $this->phone = $phone;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Slot>
+     */
+    public function getSlots(): Collection
+    {
+        return $this->slots;
+    }
+
+    public function addSlot(Slot $slot): static
+    {
+        if (!$this->slots->contains($slot)) {
+            $this->slots->add($slot);
+            $slot->setSeller($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSlot(Slot $slot): static
+    {
+        if ($this->slots->removeElement($slot)) {
+            // set the owning side to null (unless already changed)
+            if ($slot->getSeller() === $this) {
+                $slot->setSeller(null);
+            }
+        }
 
         return $this;
     }

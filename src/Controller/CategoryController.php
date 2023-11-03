@@ -34,8 +34,8 @@ class CategoryController extends AbstractController
         $decodedBody = json_decode($request->getContent());
 
         $category = $categoryService->create(
-            $decodedBody->name,
-            $decodedBody->description
+            name: $decodedBody->name,
+            description: $decodedBody->description
         );
 
         $errors = $validator->validate($category);
