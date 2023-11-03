@@ -4,46 +4,35 @@ namespace App\Controller;
 
 use App\Entity\Category;
 use App\Service\CategoryService;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('/api/categories')]
 class CategoryController extends AbstractController
 {
-    #[Route('', name: 'category_index', methods: ['GET'])]
-    public function index(EntityManagerInterface $entityManager): JsonResponse
+    public function __construct(readonly CategoryService $categoryService)
     {
-        $categories = $entityManager->getRepository(Category::class)->findAll();
+    }
 
+    #[Route('', name: 'category_index', methods: ['GET'])]
+    public function index(): JsonResponse
+    {
+        $categories = $this->categoryService->getAll();
         return $this->json($categories);
     }
 
     #[IsGranted('ROLE_MODERATOR', statusCode: 403)]
     #[Route('', name: 'category_create', methods: ['POST'])]
-    public function create(
-        Request $request,
-        ValidatorInterface $validator,
-        CategoryService $categoryService
-    ): JsonResponse
+    public function create(Request $request): JsonResponse
     {
         $decodedBody = json_decode($request->getContent());
-
-        $category = $categoryService->create(
+        $category = $this->categoryService->create(
             name: $decodedBody->name,
             description: $decodedBody->description
         );
-
-        $errors = $validator->validate($category);
-        if (count($errors) > 0) {
-            return $this->json((string) $errors, 400);
-        }
-
-        $categoryService->save($category);
 
         return $this->json($category);
     }
@@ -56,21 +45,19 @@ class CategoryController extends AbstractController
 
     #[IsGranted('ROLE_MODERATOR', statusCode: 403)]
     #[Route('/{id}', name: 'category_update', methods: ['PUT'])]
-    public function update(EntityManagerInterface $entityManager, Request $request, Category $category): JsonResponse
+    public function update(Request $request, Category $category): JsonResponse
     {
         $decodedBody = json_decode($request->getContent());
-        $category->setDescription($decodedBody->description);
-        $entityManager->flush();
+        $this->categoryService->update($category, $decodedBody->description);
 
         return $this->json($category);
     }
 
     #[IsGranted('ROLE_MODERATOR', statusCode: 403)]
     #[Route('/{id}', name: 'category_delete', methods: ['DELETE'])]
-    public function delete(Category $category, CategoryService $categoryService): JsonResponse
+    public function delete(Category $category): JsonResponse
     {
-        $categoryService->delete($category);
-
+        $this->categoryService->delete($category);
         return $this->json([]);
     }
 }
