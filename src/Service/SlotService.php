@@ -35,6 +35,8 @@ class SlotService extends BaseService
             $slot->addProduct($product);
         }
 
+        $this->save($slot);
+
         return $slot;
     }
 }

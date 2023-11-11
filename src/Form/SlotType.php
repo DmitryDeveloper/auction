@@ -5,22 +5,18 @@ namespace App\Form;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\MoneyType;
+use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
-class UpdateProductType extends BaseType
+class SlotType extends BaseType
 {
-    public function buildForm(FormBuilderInterface $builder, array $options): void
+    public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('name', TextType::class, [
-                'constraints' => [
-                    new Assert\NotBlank(),
-                    new Assert\Length(['min' => 3, 'max' => 255]),
-                ],
-            ])
-            ->add('short_description', TextType::class, [
+            ->add('title', TextType::class, [
                 'constraints' => [
                     new Assert\NotBlank(),
                     new Assert\Length(['min' => 3, 'max' => 255]),
@@ -29,10 +25,27 @@ class UpdateProductType extends BaseType
             ->add('description', TextareaType::class, [
                 'constraints' => [
                     new Assert\NotBlank(),
-                    new Assert\Length(['min' => 10]),
                 ],
             ])
-            ->add('categories', CollectionType::class, [
+            ->add('startPrice', MoneyType::class, [
+                'constraints' => [
+                    new Assert\NotBlank(),
+                    new Assert\Type(['type' => 'numeric']),
+                ],
+            ])
+            ->add('buyImmediatelyPrice', MoneyType::class, [
+                'constraints' => [
+                    new Assert\Type(['type' => 'numeric']),
+                ],
+            ])
+            ->add('finishDate', DateTimeType::class, [
+                'widget' => 'single_text',
+                'constraints' => [
+                    new Assert\NotBlank(),
+                    new Assert\DateTime(),
+                ],
+            ])
+            ->add('productIds', CollectionType::class, [
                 'entry_type' => IntegerType::class,
                 'allow_add' => true,
                 'constraints' => [
