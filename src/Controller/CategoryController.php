@@ -3,15 +3,15 @@
 namespace App\Controller;
 
 use App\Entity\Category;
+use App\Form\CategoryType;
 use App\Service\CategoryService;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/api/categories')]
-class CategoryController extends AbstractController
+class CategoryController extends BaseController
 {
     public function __construct(readonly CategoryService $categoryService)
     {
@@ -28,10 +28,18 @@ class CategoryController extends AbstractController
     #[Route('', name: 'category_create', methods: ['POST'])]
     public function create(Request $request): JsonResponse
     {
-        $decodedBody = json_decode($request->getContent());
+        $form = $this->createForm(CategoryType::class)
+            ->submit(json_decode($request->getContent(), true));
+
+        if (!$form->isValid()) {
+            $errors = $this->getErrorsFromForm($form->getErrors(true, true));
+            return $this->json(['errors' => $errors], 400);
+        }
+
+        $data = $form->getData();
         $category = $this->categoryService->create(
-            name: $decodedBody->name,
-            description: $decodedBody->description
+            name: $data['name'],
+            description: $data['description']
         );
 
         return $this->json($category);

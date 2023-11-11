@@ -4,16 +4,11 @@ namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
-
-/**
- * @Route("/api", name="api_")
- */
+use Symfony\Component\Routing\Annotation\Route;
 
 class HealthCheckController extends AbstractController
 {
-    /**
-     * @Route("/health", name="dashboard")
-     */
+    #[Route('/api/health', name: 'health_check', methods: ['GET'])]
     public function index(): Response
     {
         return $this->json('ok');
