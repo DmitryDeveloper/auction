@@ -2,12 +2,21 @@
 
 namespace App\Service;
 
+use App\Repository\ProductRepository;
+use App\Repository\SlotRepository;
 use DateTime;
 use App\Entity\Slot;
 use App\Entity\User;
 
-class SlotService extends BaseService
+readonly class SlotService
 {
+    public function __construct(
+        private readonly SlotRepository    $slotRepository,
+        private readonly ProductRepository $productRepository
+    )
+    {
+    }
+
     public function create(
         string $title,
         string $description,
@@ -26,7 +35,7 @@ class SlotService extends BaseService
         $slot->setBuyImmediatelyPrice($buyImmediatelyPrice);
         $slot->setFinishDate(new DateTime($finishDate));
 
-        $products = $this->entityManager->getRepository(Slot::class)->findBy([
+        $products = $this->productRepository->findBy([
             'id' => $productIds,
             'seller' => $seller
         ]);
@@ -35,7 +44,7 @@ class SlotService extends BaseService
             $slot->addProduct($product);
         }
 
-        $this->save($slot);
+        $this->slotRepository->save($slot);
 
         return $slot;
     }

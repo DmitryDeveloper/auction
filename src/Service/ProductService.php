@@ -6,20 +6,17 @@ use App\Entity\Product;
 use App\Entity\User;
 use App\Repository\CategoryRepository;
 use App\Repository\ProductRepository;
-use Doctrine\ORM\EntityManagerInterface;
 
-class ProductService extends BaseService
+readonly class ProductService
 {
-    private readonly ProductRepository $productRepository;
-    private readonly CategoryRepository $categoryRepository;
+    private ProductRepository $productRepository;
+    private CategoryRepository $categoryRepository;
 
     public function __construct(
-        EntityManagerInterface $entityManager,
         ProductRepository $productRepository,
         CategoryRepository $categoryRepository
     )
     {
-        parent::__construct($entityManager);
         $this->productRepository = $productRepository;
         $this->categoryRepository = $categoryRepository;
     }
@@ -41,7 +38,7 @@ class ProductService extends BaseService
         $product->addCategories($categories);
         $product->setSeller($user);
 
-        $this->save($product);
+        $this->productRepository->save($product);
 
         return $product;
     }
@@ -59,12 +56,13 @@ class ProductService extends BaseService
         $product->setShortDescription($shortDescription);
         $product->setDescription($description);
         $product->addCategories($categories);
-        $this->entityManager->flush();
+
+        $this->productRepository->flush();
 
         return $product;
     }
 
-    public function getAll()
+    public function getAll(): array
     {
         return $this->productRepository->findAll();
     }

@@ -10,7 +10,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: SlotRepository::class)]
-class Slot extends Base
+class Slot
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -28,7 +28,7 @@ class Slot extends Base
     private ?float $start_price = null;
 
     #[ORM\Column(nullable: true)]
-    private ?float $buy_immediately_price = null;
+    private float $buy_immediately_price;
 
     #[ORM\OneToMany(mappedBy: 'slot', targetEntity: Product::class)]
     private Collection $products;
@@ -45,9 +45,13 @@ class Slot extends Base
     #[ORM\Column(length: 255)]
     private ?string $title = null;
 
+    #[ORM\OneToMany(mappedBy: 'slot', targetEntity: Bid::class)]
+    private Collection $bids;
+
     public function __construct()
     {
         $this->products = new ArrayCollection();
+        $this->bids = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -91,12 +95,12 @@ class Slot extends Base
         return $this;
     }
 
-    public function getBuyImmediatelyPrice(): ?float
+    public function getBuyImmediatelyPrice(): float
     {
         return $this->buy_immediately_price;
     }
 
-    public function setBuyImmediatelyPrice(?float $buy_immediately_price): static
+    public function setBuyImmediatelyPrice(float $buy_immediately_price): static
     {
         $this->buy_immediately_price = $buy_immediately_price;
 
@@ -179,5 +183,45 @@ class Slot extends Base
         $this->title = $title;
 
         return $this;
+    }
+
+    /**
+     * @return Collection<int, Bid>
+     */
+    public function getBids(): Collection
+    {
+        return $this->bids;
+    }
+
+    public function addBid(Bid $bid): static
+    {
+        if (!$this->bids->contains($bid)) {
+            $this->bids->add($bid);
+            $bid->setSlot($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBid(Bid $bid): static
+    {
+        if ($this->bids->removeElement($bid)) {
+            // set the owning side to null (unless already changed)
+            if ($bid->getSlot() === $this) {
+                $bid->setSlot(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function canBeBoughtImmediately(Bid $bid): bool
+    {
+        return $bid->getValue() >= $this->getBuyImmediatelyPrice();
+    }
+
+    public function markAsReserved(): void
+    {
+        $this->setState(SlotState::RESERVED->value);
     }
 }

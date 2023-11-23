@@ -21,6 +21,23 @@ class UserAddressRepository extends ServiceEntityRepository
         parent::__construct($registry, UserAddress::class);
     }
 
+    public function save(UserAddress $address): void
+    {
+        $this->_em->persist($address);
+        $this->_em->flush();
+    }
+
+    public function delete(UserAddress $address): void
+    {
+        $this->_em->remove($address);
+        $this->_em->flush();
+    }
+
+    public function flush(): void
+    {
+        $this->_em->flush();
+    }
+
 //    /**
 //     * @return UserAddress[] Returns an array of UserAddress objects
 //     */

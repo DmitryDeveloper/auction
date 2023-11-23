@@ -4,17 +4,11 @@ namespace App\Service;
 
 use App\Entity\Category;
 use App\Repository\CategoryRepository;
-use Doctrine\ORM\EntityManagerInterface;
 
-class CategoryService extends BaseService
+readonly class CategoryService
 {
-    private readonly CategoryRepository $categoryRepository;
-
-    public function __construct(EntityManagerInterface $entityManager, CategoryRepository $categoryRepository)
-    {
-        parent::__construct($entityManager);
-        $this->categoryRepository = $categoryRepository;
-    }
+    public function __construct(private CategoryRepository $categoryRepository)
+    {}
 
     public function create(string $name, string $description): Category
     {
@@ -22,7 +16,7 @@ class CategoryService extends BaseService
         $category->setName($name);
         $category->setDescription($description);
 
-        $this->save($category);
+        $this->categoryRepository->save($category);
 
         return $category;
     }
@@ -30,12 +24,12 @@ class CategoryService extends BaseService
     public function update(Category $category, string $description): Category
     {
         $category->setDescription($description);
-        $this->entityManager->flush();
+        $this->categoryRepository->flush();
 
         return $category;
     }
 
-    public function getAll()
+    public function getAll(): array
     {
         return $this->categoryRepository->findAll();
     }

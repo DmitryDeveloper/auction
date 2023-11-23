@@ -21,6 +21,23 @@ class SlotRepository extends ServiceEntityRepository
         parent::__construct($registry, Slot::class);
     }
 
+    public function save(Slot $slot): void
+    {
+        $this->_em->persist($slot);
+        $this->_em->flush();
+    }
+
+    public function delete(Slot $slot): void
+    {
+        $this->_em->remove($slot);
+        $this->_em->flush();
+    }
+
+    public function flush(): void
+    {
+        $this->_em->flush();
+    }
+
 //    /**
 //     * @return Slot[] Returns an array of Slot objects
 //     */

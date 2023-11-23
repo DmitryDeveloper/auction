@@ -13,7 +13,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
-class User extends Base implements UserInterface, PasswordAuthenticatedUserInterface
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -51,9 +51,13 @@ class User extends Base implements UserInterface, PasswordAuthenticatedUserInter
     #[ORM\OneToMany(mappedBy: 'seller', targetEntity: Slot::class)]
     private Collection $slots;
 
+    #[ORM\OneToMany(mappedBy: 'buyer', targetEntity: Bid::class)]
+    private Collection $bids;
+
     public function __construct()
     {
         $this->slots = new ArrayCollection();
+        $this->bids = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -214,6 +218,36 @@ class User extends Base implements UserInterface, PasswordAuthenticatedUserInter
             // set the owning side to null (unless already changed)
             if ($slot->getSeller() === $this) {
                 $slot->setSeller(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Bid>
+     */
+    public function getBids(): Collection
+    {
+        return $this->bids;
+    }
+
+    public function addBid(Bid $bid): static
+    {
+        if (!$this->bids->contains($bid)) {
+            $this->bids->add($bid);
+            $bid->setBuyer($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBid(Bid $bid): static
+    {
+        if ($this->bids->removeElement($bid)) {
+            // set the owning side to null (unless already changed)
+            if ($bid->getBuyer() === $this) {
+                $bid->setBuyer(null);
             }
         }
 
